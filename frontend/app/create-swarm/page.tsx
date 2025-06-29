@@ -16,9 +16,15 @@ interface EnvVariable {
 }
 
 export default function CreateSwarmPage() {
-  const [platform, setPlatform] = useState("")
+  const [platform, setPlatform] = useState("discord")
   const [hostingLocation, setHostingLocation] = useState("gemini")
-  const [envVariables, setEnvVariables] = useState<EnvVariable[]>([{ id: "1", name: "", value: "" }])
+  const [envVariables, setEnvVariables] = useState<EnvVariable[]>([
+    { id: "1", name: "DISCORD_TOKEN", value: "" },
+    { id: "2", name: "DISCORD_APP_ID", value: "" },
+    { id: "3", name: "GEMINI_API_KEY", value: "" },
+  ]);
+  const [loading, setLoading] = useState(false)
+  const [showSnackbar, setShowSnackbar] = useState(false)
 
   const addEnvVariable = () => {
     const newId = Date.now().toString()
@@ -36,7 +42,13 @@ export default function CreateSwarmPage() {
   }
 
   const handleDeploy = () => {
-    // Handle deployment logic here
+    setLoading(true)
+    setShowSnackbar(false)
+    
+    setTimeout(() => {
+      setLoading(false)
+      setShowSnackbar(true)
+    }, 5000)
     console.log("Deploying swarm with:", { platform, hostingLocation, envVariables })
   }
 

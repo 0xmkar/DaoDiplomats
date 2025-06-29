@@ -18,9 +18,9 @@ export default function HomePage() {
               DaoDiplomats
             </span>
           </div>
-          <Button variant="outline" className="rounded-full bg-transparent">
+          {/* <Button variant="outline" className="rounded-full bg-transparent">
             Connect Wallet
-          </Button>
+          </Button> */}
         </nav>
       </header>
 
