@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ArrowLeft, Plus, Trash2, Sparkles, Bot } from "lucide-react"
 
 interface EnvVariable {
@@ -22,9 +23,9 @@ export default function CreateSwarmPage() {
     { id: "1", name: "DISCORD_TOKEN", value: "" },
     { id: "2", name: "DISCORD_APP_ID", value: "" },
     { id: "3", name: "GEMINI_API_KEY", value: "" },
-  ]);
-  const [loading, setLoading] = useState(false)
-  const [showSnackbar, setShowSnackbar] = useState(false)
+  ])
+  const [isLoading, setIsLoading] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
 
   const addEnvVariable = () => {
     const newId = Date.now().toString()
@@ -41,16 +42,43 @@ export default function CreateSwarmPage() {
     setEnvVariables(envVariables.map((env) => (env.id === id ? { ...env, [field]: value } : env)))
   }
 
-  const handleDeploy = () => {
-    setLoading(true)
-    setShowSnackbar(false)
+  const handleDeploy = async () => {
+    setIsLoading(true)
+    setShowSuccess(false)
+
+    try {
+      console.log("Deploying swarm with:", { platform, hostingLocation, envVariables })
+
+      const response = await fetch('http://localhost:3002/api/deploy-swarm', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          platform,
+          hostingLocation,
+          envVariables
+        })
+      })
     
-    setTimeout(() => {
-      setLoading(false)
-      setShowSnackbar(true)
-    }, 5000)
-    console.log("Deploying swarm with:", { platform, hostingLocation, envVariables })
-  }
+      const result = await response.json()
+
+      if (result.success) {
+        setIsLoading(false)
+        setShowSuccess(true)
+        console.log("Deployment successful:", result)
+
+        setTimeout(() => {
+          setShowSuccess(false)
+        }, 5000)
+      } else {
+        throw new Error(result.message || 'Deployment failed')
+      }
+      } catch (error) {
+        setIsLoading(false)
+        console.error("Deployment error:", error)
+        alert(`Deployment failed: ${error}`)
+      }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
@@ -108,9 +136,10 @@ export default function CreateSwarmPage() {
                   </SelectTrigger>
                   <SelectContent className="rounded-xl">
                     <SelectItem value="discord">Discord</SelectItem>
-                    <SelectItem value="snapshot">Snapshot</SelectItem>
+                    <SelectItem value="telegram">Telegram</SelectItem>
                     <SelectItem value="farcaster">Farcaster</SelectItem>
-                    <SelectItem value="custom">Custom</SelectItem>
+                    <SelectItem value="twitter">Twitter</SelectItem>
+                    <SelectItem value="custom">custom</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -199,14 +228,83 @@ export default function CreateSwarmPage() {
                   onClick={handleDeploy}
                   size="lg"
                   className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-                  disabled={!platform}
+                  disabled={!platform || isLoading}
                 >
-                  <Bot className="w-5 h-5 mr-2" />
-                  Deploy Swarm
+                  {isLoading ? (
+                    <>
+                      <svg
+                        className="animate-spin h-5 w-5 mr-2 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Deploying...
+                    </>
+                  ) : (
+                    <>
+                      <Bot className="w-5 h-5 mr-2" />
+                      Deploy Swarm
+                    </>
+                  )}
                 </Button>
               </div>
             </CardContent>
           </Card>
+
+          {/* Success Notification */}
+          {showSuccess && (
+            <div className="fixed bottom-4 right-4 z-50">
+              <Alert className="bg-green-100 border-green-400 text-green-800 rounded-xl shadow-lg">
+                <AlertDescription className="flex items-center gap-2">
+                  <Bot className="w-5 h-5" />
+                  Swarm Deployed Successfully!
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
+
+          {/* Loading Overlay */}
+          {isLoading && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-xl p-6 flex items-center gap-3">
+                <svg
+                  className="animate-spin h-8 w-8 text-purple-500"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                <span className="text-lg font-semibold text-gray-800">Deploying Swarm...</span>
+              </div>
+            </div>
+          )}
 
           {/* Info Cards */}
           <div className="grid md:grid-cols-2 gap-6">
@@ -236,4 +334,5 @@ export default function CreateSwarmPage() {
       </main>
     </div>
   )
+}
 }

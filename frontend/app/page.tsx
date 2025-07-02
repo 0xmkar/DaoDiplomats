@@ -37,7 +37,7 @@ export default function HomePage() {
                 Swarm Intelligence for DAO Governance
               </h2>
               <p className="text-lg text-gray-600 leading-relaxed max-w-lg">
-                Deploy intelligent agent swarms that coordinate across platforms to enhance DAO decision-making. Harness
+                Deploy intelligent agent swarms across platforms to enhance DAO decision-making. Harness
                 collective intelligence for better governance outcomes.
               </p>
             </div>
@@ -116,7 +116,7 @@ export default function HomePage() {
                 </div>
                 <h4 className="text-xl font-semibold text-gray-800">Multi-Platform Coordination</h4>
                 <p className="text-gray-600">
-                  Seamlessly coordinate across Discord, Snapshot, Farcaster, and custom platforms
+                  Seamlessly coordinate across Discord, Telegram, Farcaster, Twitter(X), etc.
                 </p>
               </CardContent>
             </Card>
